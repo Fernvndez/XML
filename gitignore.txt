@@ -1,0 +1,57 @@
+# Binários compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/build/
+
+# Arquivos de teste
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Dependências
+/vendor/
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Certificados digitais (NUNCA commitar certificados!)
+/certs/
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+
+# Armazenamento de XMLs
+/storage/
+*.xml
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Arquivos temporários
+tmp/
+temp/
+
+# Go workspace file
+go.work
+
+# Air (hot-reload)
+tmp/
+.air.toml

@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nfe_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nfe_sefaz
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nfe_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nfe_api
+    environment:
+      - SERVER_PORT=8080
+      - SERVER_HOST=0.0.0.0
+      - ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=nfe_sefaz
+      - DB_SSLMODE=disable
+      - SEFAZ_AMBIENTE=homologacao
+      - SEFAZ_UF=SP
+      - SEFAZ_CNPJ=${SEFAZ_CNPJ}
+      - SEFAZ_CERT_PATH=/app/certs/certificado.pfx
+      - SEFAZ_CERT_PASSWORD=${SEFAZ_CERT_PASSWORD}
+      - XML_STORAGE_PATH=/app/storage/xmls
+      - SYNC_CRON_SCHEDULE=0 */6 * * *
+      - SYNC_ENABLED=true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./certs:/app/certs:ro
+      - ./storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nfe_network
+
+  migrate:
+    image: migrate/migrate
+    container_name: nfe_migrate
+    volumes:
+      - ./migrations:/migrations
+    command: [
+      "-path", "/migrations",
+      "-database", "postgresql://postgres:postgres@postgres:5432/nfe_sefaz?sslmode=disable",
+      "up"
+    ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nfe_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  nfe_network:
+    driver: bridge
