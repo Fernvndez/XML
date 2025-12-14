@@ -122,8 +122,7 @@ nfe-sefaz-sync/
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nfe-sefaz-sync.git
-cd nfe-sefaz-sync
+git clone https://github.com/fernvndez/XML
 ```
 
 ### 2. Instale as dependências
